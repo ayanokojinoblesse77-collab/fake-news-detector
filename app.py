@@ -100,17 +100,17 @@ def predict_article(title_input, body_input):
     raw_combined_text = str(title_input) + " " + str(body_input)
 
     # Re-engineering the precise structural features used during model training
-    word_count      = float(len(str(body_input).split()))
-    char_count      = float(len(str(body_input)))
-    title_length    = float(len(str(title_input).split()))
-    exclamation_cnt = float(raw_combined_text.count('!'))
-    question_cnt    = float(raw_combined_text.count('?'))
-    uppercase_ratio = float(sum(1 for c in raw_combined_text if c.isupper()) / (len(raw_combined_text) + 1))
+    word_count      = len(str(body_input).split())
+    char_count      = len(str(body_input))
+    title_length    = len(str(title_input).split())
+    exclamation_cnt = raw_combined_text.count('!')
+    question_cnt    = raw_combined_text.count('?')
+    uppercase_ratio = sum(1 for c in raw_combined_text if c.isupper()) / (len(raw_combined_text) + 1)
 
-    numerical_features_single = np.array([[
+    numerical_features_single = np.array([
         word_count, char_count, title_length,
         exclamation_cnt, question_cnt, uppercase_ratio
-    ]])
+    ]).reshape(1, -1)
 
     # Normalize structural features using your saved StandardScaler matrix
     scaled_numerical_features = scaler.transform(numerical_features_single)
@@ -278,4 +278,4 @@ if analyse_btn:
             plt.close()
 
 st.divider()
-st.caption("TechCrush Bootcamp Node · Cohort 6 · Group 7 · Production Pipeline Stable Core")
+st.caption("TechCrush Bootcamp Team Node · Cohort 6 · Group 7 · Production Pipeline Stable Core")
