@@ -60,18 +60,20 @@ st.markdown("""
 # ── Load Saved Artifacts (With Auto-Case Insensitivity Correction) ─────
 @st.cache_resource
 def load_models():
-    files = os.listdir(".")
-    
+    # Anchor to the directory where app.py lives — fixes Streamlit Cloud path resolution
+    base  = os.path.dirname(os.path.abspath(__file__))
+    files = os.listdir(base)
+
     # Prevents FileNotFoundError caused by strict Linux case-sensitive filesystems
-    lr_file = next((f for f in files if "lr_fake_news" in f.lower() and f.endswith(".pkl")), "lr_fake_news_model.pkl")
-    rf_file = next((f for f in files if "rf_fake_news" in f.lower() and f.endswith(".pkl")), "rf_fake_news_model.pkl")
-    tfidf_file = next((f for f in files if "tfidf" in f.lower() and f.endswith(".pkl")), "tfidf_vectorizer.pkl")
+    lr_file     = next((f for f in files if "lr_fake_news" in f.lower() and f.endswith(".pkl")), "lr_fake_news_model.pkl")
+    rf_file     = next((f for f in files if "rf_fake_news" in f.lower() and f.endswith(".pkl")), "rf_fake_news_model.pkl")
+    tfidf_file  = next((f for f in files if "tfidf" in f.lower() and f.endswith(".pkl")), "tfidf_vectorizer.pkl")
     scaler_file = next((f for f in files if "scaler" in f.lower() and f.endswith(".pkl")), "scaler.pkl")
 
-    lr     = joblib.load(lr_file)
-    rf     = joblib.load(rf_file)
-    tfidf  = joblib.load(tfidf_file)
-    scaler = joblib.load(scaler_file)
+    lr     = joblib.load(os.path.join(base, lr_file))
+    rf     = joblib.load(os.path.join(base, rf_file))
+    tfidf  = joblib.load(os.path.join(base, tfidf_file))
+    scaler = joblib.load(os.path.join(base, scaler_file))
     return lr, rf, tfidf, scaler
 
 try:
@@ -100,17 +102,17 @@ def predict_article(title_input, body_input):
     raw_combined_text = str(title_input) + " " + str(body_input)
 
     # Re-engineering the precise structural features used during model training
-    word_count      = len(str(body_input).split())
-    char_count      = len(str(body_input))
-    title_length    = len(str(title_input).split())
-    exclamation_cnt = raw_combined_text.count('!')
-    question_cnt    = raw_combined_text.count('?')
-    uppercase_ratio = sum(1 for c in raw_combined_text if c.isupper()) / (len(raw_combined_text) + 1)
+    word_count      = float(len(str(body_input).split()))
+    char_count      = float(len(str(body_input)))
+    title_length    = float(len(str(title_input).split()))
+    exclamation_cnt = float(raw_combined_text.count('!'))
+    question_cnt    = float(raw_combined_text.count('?'))
+    uppercase_ratio = float(sum(1 for c in raw_combined_text if c.isupper()) / (len(raw_combined_text) + 1))
 
-    numerical_features_single = np.array([
+    numerical_features_single = np.array([[
         word_count, char_count, title_length,
         exclamation_cnt, question_cnt, uppercase_ratio
-    ]).reshape(1, -1)
+    ]])
 
     # Normalize structural features using your saved StandardScaler matrix
     scaled_numerical_features = scaler.transform(numerical_features_single)
@@ -278,4 +280,4 @@ if analyse_btn:
             plt.close()
 
 st.divider()
-st.caption("TechCrush Bootcamp Team Node · Cohort 6 · Group 7 · Production Pipeline Stable Core")
+st.caption("TechCrush Bootcamp Node · Cohort 6 · Group 7 · Production Pipeline Stable Core")
