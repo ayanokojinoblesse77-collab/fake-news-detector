@@ -1,6 +1,6 @@
 streamlit
-scikit-learn
 joblib
+scikit-learn
 nltk
 numpy
 matplotlib
